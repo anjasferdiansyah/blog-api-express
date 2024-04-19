@@ -1,39 +1,35 @@
-const knex = require("../knexmodels/knex");
-const db = require("../models/index");
+/* eslint-disable no-undef */
+const {
+  createUser,
+  findAllUsers,
+  findUserById,
+  updatingUser,
+  deletingUser,
+} = require("../db/user.repository");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 const register = async (req, res) => {
-  const { firstName, lastName, userName, email, password } = req.body;
+  try {
+    const { userName, email, password } = req.body;
 
-  if (!firstName || !lastName || !userName || !email || !password) {
-    return res.status(400).send({
-      message: "All fields are required",
+    const hashPassword = bcrypt.hashSync(password, 8);
+
+    const regis = await createUser({
+      userName,
+      email,
+      password: hashPassword,
+    });
+
+    return res.status(201).send({
+      message: "Create User Success",
+      data: regis,
+    });
+  } catch (error) {
+    return res.status(500).send({
+      message: error,
     });
   }
-
-  //   const newUser = await knex("users").insert({
-  //     firstName,
-  //     lastName,
-  //     userName,
-  //     email,
-  //     password,
-  //   });
-
-  const hashPassword = bcrypt.hashSync(password, 8);
-
-  const regis = await db.user.create({
-    firstName,
-    lastName,
-    userName,
-    email,
-    password: hashPassword,
-  });
-
-  return res.status(201).send({
-    message: "Create User Success",
-    data: regis,
-  });
 };
 
 const login = async (req, res) => {
@@ -55,7 +51,7 @@ const login = async (req, res) => {
 };
 
 const getAllUsers = async (req, res) => {
-  const allUsers = await knex.select().from("users");
+  const allUsers = await findAllUsers();
 
   return res.status(200).send({
     message: "Get All Users Success",
@@ -66,11 +62,7 @@ const getAllUsers = async (req, res) => {
 const getUserById = async (req, res) => {
   const { id } = req.params;
 
-  const userById = await db.user.findOne({
-    where: {
-      id,
-    },
-  });
+  const userById = await findUserById(id);
 
   return res.status(200).send({
     message: "Get User Success",
@@ -82,22 +74,15 @@ const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const { firstName, lastName, userName, email, password } = req.body;
+    const { userName, email, password } = req.body;
 
-    const updateUser = await db.user.update(
-      {
-        firstName,
-        lastName,
-        userName,
-        email,
-        password,
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+    const hashPassword = bcrypt.hashSync(password, 8);
+
+    const updateUser = await updatingUser(id, {
+      userName,
+      email,
+      password: hashPassword,
+    });
 
     return res.status(201).send({
       message: "Update Success",
@@ -137,11 +122,7 @@ const uploadProfilePicture = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { id } = req.params;
 
-  const deleteUser = await db.user.destroy({
-    where: {
-      id,
-    },
-  });
+  const deleteUser = await deletingUser(id);
 
   return res.status(200).send({
     message: "Delete Success",

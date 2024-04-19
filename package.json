@@ -5,16 +5,19 @@
   "main": "src/index.js",
   "scripts": {
     "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
-    "migrate": "knex migrate:latest --knexfile src/knexmodels/knexfile.js",
-    "migrate:down": "knex migrate:down --knexfile src/knexmodels/knexfile.js"
+    "start": "node src/index.js"
   },
   "author": "Mohammad Anjas F",
   "license": "MIT",
   "devDependencies": {
-    "nodemon": "latest"
+    "@eslint/js": "^9.0.0",
+    "eslint": "^9.0.0",
+    "globals": "^15.0.0",
+    "nodemon": "latest",
+    "prisma": "^5.12.1"
   },
   "dependencies": {
+    "@prisma/client": "^5.12.1",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

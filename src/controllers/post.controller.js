@@ -1,40 +1,17 @@
-const { limit } = require("../knexmodels/knex");
-const db = require("../models/index");
+const {
+  findPostsByQuery,
+  creatingPost,
+  updatingPost,
+  deletingPost,
+  findPostById,
+} = require("../db/post.repository");
+const { connectOrCreateTag } = require("../db/tag.repository");
 
 const getAllPosts = async (req, res) => {
-  // filtering untuk mendapatkan post sesuai query mis: ?user_id=1
-  const queryParams = req.query;
-  // filtering berdasarkan user_id
-  if (queryParams.user_id) {
-    queryParams.user_id = {
-      [db.Sequelize.Op.eq]: queryParams.user_id,
-    };
-  }
-
-  // filtering berdasarkan title
-  if (queryParams.title && queryParams.title !== "") {
-    queryParams.title = {
-      [db.Sequelize.Op.like]: `%${queryParams.title}%`,
-    };
-  }
-
-  // filtering berdasarkan body
-  if (queryParams.body && queryParams.body !== "") {
-    queryParams.body = {
-      [db.Sequelize.Op.like]: `%${queryParams.body}%`,
-    };
-  }
+  const { query } = req;
 
   try {
-    const limit = parseInt(req.query.limit) || 10;
-    delete queryParams.limit;
-
-    const allPosts = await db.post.findAll(
-      {
-        where: queryParams,
-        limit,
-      } || {}
-    );
+    const allPosts = await findPostsByQuery(query);
 
     return res.status(200).send({
       message: "Get All Posts Success",
@@ -50,12 +27,9 @@ const getAllPosts = async (req, res) => {
 const getPostById = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log(id);
 
-    const postById = await db.post.findOne({
-      where: {
-        id,
-      },
-    });
+    const postById = await findPostById(id);
 
     return res.status(200).send({
       message: "Get Post Success",
@@ -70,23 +44,26 @@ const getPostById = async (req, res) => {
 
 const createPost = async (req, res) => {
   try {
-    const { title, body } = req.body;
+    const { title, body, tags } = req.body;
     const userId = req.user.id;
-    console.log(userId);
 
-    const newPost = await db.post.create({
+    // Cari tag yang sudah ada dalam database apabila tidak ada, buat yang baru
+    const connectOrCreate = await connectOrCreateTag(tags);
+
+    // Buat post dan hubungkan dengan tag yang sudah ada atau baru dibuat
+    const createdPost = await creatingPost(userId, {
       title,
       body,
-      user_id: userId,
+      tags: connectOrCreate,
     });
 
     return res.status(201).send({
       message: "Create Post Success",
-      data: newPost,
+      data: { ...createdPost, tags: connectOrCreate },
     });
   } catch (error) {
     return res.status(500).send({
-      message: error,
+      message: error.message || "Internal Server Error",
     });
   }
 };
@@ -94,23 +71,25 @@ const createPost = async (req, res) => {
 const updatePost = async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, body } = req.body;
+    const postId = parseInt(id);
+    const { title, body, tags } = req.body;
 
-    const updatePost = await db.post.update(
-      {
-        title,
-        body,
-      },
-      {
-        where: {
-          id,
-        },
-      }
-    );
+    // Cari tag yang sudah ada dalam database
+    const connectOrCreate = await connectOrCreateTag(tags);
+    console.log(connectOrCreate);
 
-    return res.status(201).send({
+    const updatePost = await updatingPost(postId, {
+      title,
+      body,
+      tags: connectOrCreate,
+    });
+
+    res.status(201).send({
       message: "Update Post Success",
-      data: updatePost,
+      data: {
+        ...updatePost,
+        tags: connectOrCreate,
+      },
     });
   } catch (error) {
     return res.status(500).send({
@@ -122,12 +101,9 @@ const updatePost = async (req, res) => {
 const deletePost = async (req, res) => {
   try {
     const { id } = req.params;
+    const postId = parseInt(id);
 
-    const deletePost = await db.post.destroy({
-      where: {
-        id,
-      },
-    });
+    const deletePost = await deletingPost(postId);
 
     return res.status(201).send({
       message: "Delete Post Success",

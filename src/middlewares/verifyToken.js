@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const db = require("../models/index");
 
 const verifyToken = (req, res, next) => {
   try {
@@ -10,6 +9,7 @@ const verifyToken = (req, res, next) => {
       });
     }
 
+    // eslint-disable-next-line no-undef
     let checkToken = jwt.verify(token.split(" ")[1], process.env.JWT_SECRET);
 
     if (!checkToken) {

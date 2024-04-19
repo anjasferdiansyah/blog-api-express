@@ -12,6 +12,7 @@ const { verifyToken } = require("../middlewares/verifyToken");
 const {
   registerValidator,
   loginValidator,
+  updateUserValidator,
 } = require("../middlewares/validators");
 const { uploadProfile } = require("../middlewares/upload");
 const isAdmin = require("../middlewares/isAdmin");
@@ -31,7 +32,7 @@ router.post("/register", registerValidator, register);
 router.post("/login", loginValidator, login);
 
 // update user
-router.put("/:id", verifyToken, updateUser);
+router.put("/:id", verifyToken, updateUserValidator, updateUser);
 
 // Delete user by admin
 router.delete("/:id", verifyToken, isAdmin, deleteUser);

@@ -1,7 +1,7 @@
+/* eslint-disable no-undef */
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { sequelize } = require("./models");
 
 const post = require("./routes/post.route");
 const user = require("./routes/user.route");
@@ -12,15 +12,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.use(cors({ origin: true, credentials: true }));
-
-sequelize
-  .authenticate()
-  .then((error) => {
-    console.log("Connection has been established successfully.");
-  })
-  .catch((error) => {
-    console.log("Unable to connect to the database:", error);
-  });
 
 app.use("/api/posts", post);
 app.use("/api/users", user);
