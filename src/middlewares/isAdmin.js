@@ -9,6 +9,8 @@ const isAdmin = async (req, res, next) => {
 
   const verifyAdmin = await findUserById(user.id);
 
+  console.log(verifyAdmin);
+
   if (verifyAdmin.role !== "ADMIN") {
     return res.status(403).json({
       message: "Unauthorized!, you are not admin",

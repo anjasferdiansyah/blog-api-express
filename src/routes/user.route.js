@@ -3,7 +3,6 @@ const {
   register,
   getAllUsers,
   login,
-  uploadProfilePicture,
   getUserById,
   updateUser,
   deleteUser,
@@ -14,13 +13,12 @@ const {
   loginValidator,
   updateUserValidator,
 } = require("../middlewares/validators");
-const { uploadProfile } = require("../middlewares/upload");
 const isAdmin = require("../middlewares/isAdmin");
 
 const router = express.Router();
 
 // Mendapatkan semua user
-router.get("/", verifyToken, getAllUsers);
+router.get("/", verifyToken, isAdmin, getAllUsers);
 
 // Mendapatkan user berdasarkan id
 router.get("/:id", verifyToken, getUserById);
@@ -32,17 +30,9 @@ router.post("/register", registerValidator, register);
 router.post("/login", loginValidator, login);
 
 // update user
-router.put("/:id", verifyToken, updateUserValidator, updateUser);
+router.patch("/", verifyToken, updateUserValidator, updateUser);
 
 // Delete user by admin
 router.delete("/:id", verifyToken, isAdmin, deleteUser);
-
-// update profile picture
-router.post(
-  "/uploadprofile",
-  verifyToken,
-  uploadProfile.single("foto"),
-  uploadProfilePicture
-);
 
 module.exports = router;

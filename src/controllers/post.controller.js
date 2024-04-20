@@ -74,15 +74,18 @@ const updatePost = async (req, res) => {
     const postId = parseInt(id);
     const { title, body, tags } = req.body;
 
-    // Cari tag yang sudah ada dalam database
-    const connectOrCreate = await connectOrCreateTag(tags);
-    console.log(connectOrCreate);
+    let data = { title, body };
 
-    const updatePost = await updatingPost(postId, {
-      title,
-      body,
-      tags: connectOrCreate,
-    });
+    // Cari tag yang sudah ada dalam database
+    let connectOrCreate = null;
+    if (tags) {
+      connectOrCreate = await connectOrCreateTag(tags);
+      data = { ...data, tags: connectOrCreate };
+    }
+
+    const updatePost = await updatingPost(postId, data);
+
+    console.log(updatePost);
 
     res.status(201).send({
       message: "Update Post Success",

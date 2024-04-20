@@ -35,19 +35,21 @@ const registerValidator = async (req, res, next) => {
 };
 
 const updateUserValidator = async (req, res, next) => {
-  const { userName, email, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!userName || !email || !password) {
+  if (!email || !password) {
     return res.status(400).send({
-      message: "All fields are required",
+      message: "No data to update",
     });
   }
-  if (!validator.isEmail(email, { host_whitelist: ["gmail.com"] })) {
+
+  if (email && !validator.isEmail(email, { host_whitelist: ["gmail.com"] })) {
     return res.status(400).send({
       message: "Email is not valid",
     });
   }
-  if (!validator.isStrongPassword(password)) {
+
+  if (password && !validator.isStrongPassword(password)) {
     return res.status(400).send({
       message:
         "Password is not strong enough, at least 8 characters, one uppercase, one lowercase, one number and one special character",

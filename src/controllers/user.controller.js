@@ -72,14 +72,13 @@ const getUserById = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.user.id;
 
-    const { userName, email, password } = req.body;
+    const { email, password } = req.body;
 
     const hashPassword = bcrypt.hashSync(password, 8);
 
     const updateUser = await updatingUser(id, {
-      userName,
       email,
       password: hashPassword,
     });
@@ -102,16 +101,6 @@ const uploadProfilePicture = async (req, res) => {
   console.log(user);
   console.log(foto);
 
-  const updateFoto = await db.user.update(
-    {
-      picture: foto.path,
-    },
-    {
-      where: {
-        id: user.id,
-      },
-    }
-  );
 
   return res.status(201).send({
     message: "Update Success",
