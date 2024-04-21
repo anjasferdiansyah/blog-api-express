@@ -15,7 +15,7 @@ const router = express.Router();
 initializeApp(config.firebaseConfig);
 
 // get all posts
-router.get("/", getUserProfile);
+router.get("/", verifyToken, getUserProfile);
 
 router.post("/create", verifyToken, createProfile);
 
